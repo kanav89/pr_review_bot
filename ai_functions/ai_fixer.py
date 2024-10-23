@@ -15,7 +15,8 @@ As a {language} expert, fix the following code based on the linter output:
 
 1. Apply all linter errors and warnings.
 2. Keep line length below 80 characters.
-3. Return only the corrected code without explanations.
+3. Don't change the functionality of the code.
+4. Return only the corrected code without explanations.
 
 {language} Code:
 {code_content}
