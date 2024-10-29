@@ -3,14 +3,12 @@ from flask import Flask, request, Response, redirect
 from github import GithubIntegration
 from dotenv import load_dotenv
 import logging
-from flask_sqlalchemy import SQLAlchemy
 
 from github_functions.handle_new_pr import handle_new_pr
 from github_functions.handle_new_comment import handle_new_comment
 import hmac
 import hashlib
 import base64
-import supabase
 from models import db, User
 import requests
 

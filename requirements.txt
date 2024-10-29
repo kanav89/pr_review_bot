@@ -21,3 +21,5 @@ pydantic>=2.6.4
 tiktoken>=0.6.0
 websocket-client>=1.6.2
 wrapt>=1.15.0
+Flask-SQLAlchemy>=3.1.1
+requests>=2.30.0
