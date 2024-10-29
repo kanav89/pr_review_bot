@@ -30,6 +30,10 @@ conversation_histories = {}
 ai_fixed_code_list = []
 file_to_apply_changes = ""
 def handle_new_comment(payload):
+    installation_id = payload['installation']['id']
+    access_token = git_integration.get_access_token(installation_id).token
+    print(access_token)
+    
     global ai_fixed_code_list
     
     owner = payload['repository']['owner']['login']
@@ -45,11 +49,11 @@ def handle_new_comment(payload):
     )
     repo = git_connection.get_repo(f"{owner}/{repo_name}")
     
-    files = get_pr_files(owner, repo_name, pull_number, os.getenv("GITHUB_TOKEN"))
+    files = get_pr_files(owner, repo_name, pull_number, access_token)
     content_list = []
     for file in files:
         file_url = file['contents_url']
-        file_content = get_file_content(file_url, os.getenv("GITHUB_TOKEN"))
+        file_content = get_file_content(file_url,access_token)
         content_list.append(file["filename"] + "\n" + file_content)
     # Get the conversation history for this pull request
     def get_language(filename):
@@ -81,7 +85,7 @@ def handle_new_comment(payload):
             if comment_body.lower().strip() == "@style approve changes":
                 ai_fixed_code_list = []  # Local variable
                 for file in files:
-                    content = get_file_content(file['contents_url'], os.getenv("GITHUB_TOKEN"))
+                    content = get_file_content(file['contents_url'], access_token)
                     language = get_language(file['filename'])
                     print(language)
                     if language == "Unknown":
@@ -126,7 +130,7 @@ def handle_new_comment(payload):
                                 response += f"Skipping {file['filename']} as it is an unsupported language\n"
                                 continue
                             if count < len(ai_fixed_code_list):
-                                create_and_merge(owner, repo_name, file['filename'], ai_fixed_code_list[count])
+                                create_and_merge(owner, repo_name, file['filename'], ai_fixed_code_list[count],access_token)
                                 print(f"Branch created and merged for {file['filename']}")
                                 count += 1
                             else:
@@ -145,7 +149,7 @@ def handle_new_comment(payload):
             response = ""
             # print(response)
             for file in files:
-                content = get_file_content(file['contents_url'], os.getenv("GITHUB_TOKEN"))
+                content = get_file_content(file['contents_url'], access_token)
                 language = get_language(file['filename'])
                 print(language)
                 if language == "Unknown":

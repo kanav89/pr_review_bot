@@ -1,15 +1,6 @@
 import requests
 import base64
 
-import os
-from dotenv import load_dotenv
-
-def load_github_token():
-    load_dotenv()
-    token = os.getenv("GITHUB_TOKEN")
-    if not token:
-        raise ValueError("GITHUB_TOKEN not set in environment variables")
-    return token
 
 def create_headers(token):
     return {
@@ -100,14 +91,14 @@ def create_file_on_branch(base_url, branch_name, file_path, file_content, commit
         raise Exception(f"Error creating/updating file: {response.status_code}\n{response.json()}")
     return response.json()
 
-def create_and_merge(owner, repo, file_path, file_content):
+def create_and_merge(owner, repo, file_path, file_content, access_token):
     print("Starting create_and_merge process")
     
     # Load GitHub token from environment variables
-    token = load_github_token()
+    # token = load_github_token()
     
     # Create headers for GitHub API requests
-    headers = create_headers(token)
+    headers = create_headers(access_token)
     
     # Set the name for the new branch
     new_branch_name = 'bot-branch'
