@@ -52,7 +52,7 @@ def is_valid_signature(signature, payload, secret):
 
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres.iggamyayazhlsqmbdoyj:BUqr5ek4aGqEyqWp@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
     app.secret_key = os.getenv('FLASK_SECRET_KEY') 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
