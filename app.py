@@ -9,7 +9,7 @@ from github_functions.handle_new_comment import handle_new_comment
 import hmac
 import hashlib
 import base64
-from models import db, User
+from schemas import db, User
 import requests
 
 load_dotenv()
@@ -52,7 +52,7 @@ def is_valid_signature(signature, payload, secret):
 
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
+    app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres.iggamyayazhlsqmbdoyj:BUqr5ek4aGqEyqWp@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
     app.secret_key = os.getenv('FLASK_SECRET_KEY') 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
