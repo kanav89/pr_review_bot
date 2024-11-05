@@ -16,44 +16,47 @@ def get_pr_files(owner, repo, pull_number, token):
     response.raise_for_status()
     return response.json()
 
-def get_file_content(file_url, token):
+def get_file_content(file_url, token:str,file:dict):
     headers = {'Authorization': f'token {token}'}
     response = requests.get(file_url, headers=headers)
     response.raise_for_status()
-    content = response.json()['content']
-    return b64decode(content).decode('utf-8')
 
-# def main():
-#     username = input('Enter your GitHub username: ')
-#     token = get_github_token()
-
-#     prs = get_user_prs(username, token)
+    file_data = response.json()
     
-#     if not prs:
-#         print('No open pull requests found.')
-#         return
-
-#     print(f'Found {len(prs)} open pull requests:')
-#     for i, pr in enumerate(prs, 1):
-#         print(f"{i}. {pr['title']} ({pr['html_url']})")
-
-#     pr_number = int(input('Enter the number of the PR you want to inspect: ')) - 1
-#     selected_pr = prs[pr_number]
-
-#     # Extract owner and repo from the PR URL
-#     owner, repo = selected_pr['repository_url'].split('/')[-2:]
-#     pull_number = selected_pr['number']
-
-#     files = get_pr_files(owner, repo, pull_number, token)
+    # print(file_data)
+    patch_content = file.get('patch', '')
     
-#     print(f"\nFiles changed in PR '{selected_pr['title']}':")
-#     for file in files:
+    # Split the patch content into lines
+    patch_lines = patch_content.split('\n')
+    
+    # Identify added and removed lines
+    added_lines = []
+    removed_lines = []
+    
+    for line in patch_lines:
+        if line.startswith('+') and not line.startswith('+++'):
+            print(True)
+            added_lines.append(line[1:])
+        elif line.startswith('-') and not line.startswith('---'):
+            removed_lines.append(line[1:])
+    
+    print("\nAdded Lines:")
+    for added_line in added_lines:
+        print(f"+ {added_line}")
         
-#         if file['status'] != 'removed':
-#             content = get_file_content(file['contents_url'], token)
-            
-#             print(content)
+    print("\nRemoved Lines:")
+    for removed_line in removed_lines:
+        print(f"- {removed_line}")
 
-# if __name__ == '__main__':
+    content = file_data.get('content', '')
+    if content:
+        decoded_content = patch_content+b64decode(content).decode('utf-8')
+    else:
+        decoded_content = ''
     
-#     main()
+    # Write the decoded content to the file as well
+    with open("temp.txt", 'w') as file:
+        file.write(decoded_content)
+    
+    return decoded_content
+

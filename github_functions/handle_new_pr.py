@@ -35,6 +35,7 @@ def handle_new_pr(payload):
         🎨 Check styling issues - @style
 
         Feel free to use any of these commands in a comment, and I'll be happy to help!
+        Currently the bot only supports python. AI fixer will output fixed code upto 2000 characters.
         """)
     except github.GithubException as e:
         print(f"Error creating initial comment: {e}")

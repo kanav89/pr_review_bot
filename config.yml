@@ -2,8 +2,6 @@
 
 language_options:
   - python
-  
-  
 
 # Default language if not specified
 default_language: python

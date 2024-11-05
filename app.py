@@ -9,7 +9,7 @@ from github_functions.handle_new_comment import handle_new_comment
 import hmac
 import hashlib
 import base64
-from schemas import db, User
+from db_connector.schemas import db, User
 import requests
 
 load_dotenv()

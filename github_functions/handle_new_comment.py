@@ -26,9 +26,17 @@ git_integration = GithubIntegration(
 )
 
 
-conversation_histories = {}
 ai_fixed_code_list = []
 file_to_apply_changes = ""
+def get_language(filename):
+        extension = os.path.splitext(filename)[1]
+        language_map = {
+            '.py': 'Python',
+            
+            
+        }
+        return language_map.get(extension, 'Unknown')
+
 def handle_new_comment(payload):
     installation_id = payload['installation']['id']
     access_token = git_integration.get_access_token(installation_id).token
@@ -52,18 +60,14 @@ def handle_new_comment(payload):
     files = get_pr_files(owner, repo_name, pull_number, access_token)
     content_list = []
     for file in files:
+        print(file)
         file_url = file['contents_url']
-        file_content = get_file_content(file_url,access_token)
+        language = get_language(file['filename'])
+        if language == "Python":
+            file_content = get_file_content(file_url,access_token,file)
         content_list.append(file["filename"] + "\n" + file_content)
     # Get the conversation history for this pull request
-    def get_language(filename):
-        extension = os.path.splitext(filename)[1]
-        language_map = {
-            '.py': 'Python',
-            
-            
-        }
-        return language_map.get(extension, 'Unknown')
+    
 
     def run_linter(content, language):
         if language == 'Python':
@@ -73,11 +77,12 @@ def handle_new_comment(payload):
         else:
             return "Unsupported language"
     if comment_body.lower().startswith('@bot'):
-        if pull_number not in conversation_histories:
-            conversation_histories[pull_number] = []
+        
         question = comment_body.split(' ', 1)[1]
         print(question)
         response = create_chatbot(question, content_list)
+
+
     elif comment_body.lower().startswith('@style'):
         
         if len(comment_body.strip().split(' ')) > 1:
@@ -99,10 +104,10 @@ def handle_new_comment(payload):
                     response += f"<details>\n<summary>{file['filename']}</summary>\n\n"
                     if language == 'Python':
                         response += "```python\n"
-                    elif language in ['JavaScript', 'TypeScript']:
-                        response += "```javascript\n"
-                    elif language == 'Java':
-                        response += "```java\n"
+                    # elif language in ['JavaScript', 'TypeScript']:
+                    #     response += "```javascript\n"
+                    # elif language == 'Java':
+                    #     response += "```java\n"
                     response += ai_fixed_code
                     response += "\n```\n"
                     response += "</details>\n\n"                    
@@ -137,7 +142,7 @@ def handle_new_comment(payload):
                                 print(f"No changes to apply for {file['filename']}")
                         # Delete the file after successful merge
                         os.remove(file_path)
-                        response = "Changes merged successfully"
+                        response = "Changes merged successfully\nTo close this PR, comment @style close pr"
                     else:
                         response = "No changes to merge. Please run '@style Approve Changes' first."
                 else:
@@ -165,9 +170,17 @@ def handle_new_comment(payload):
         print("No comment")
         return "ok"
     
+    # New command to close the pull request
+    if comment_body.lower().strip() == "@style close pr":
+        try:
+            issue = repo.get_issue(number=pull_number)
+            issue.edit(state='closed')  # Close the pull request
+            response = "Pull request has been closed successfully."
+        except github.GithubException as e:
+            response = f"Error closing pull request: {e}"
+            print(response)
     
     try:
-        issue = repo.get_issue(number=pull_number)
         issue.create_comment(response)
     except github.GithubException as e:
         print(f"Error creating response comment: {e}")
