@@ -9,7 +9,6 @@ from github_functions.handle_new_comment import handle_new_comment
 import hmac
 import hashlib
 import base64
-from db_connector.schemas import db, User
 import requests
 
 load_dotenv()
@@ -58,11 +57,7 @@ def create_app():
 
 
    
-    # Initialize the app with the database
-    db.init_app(app)
-
-    with app.app_context():
-        db.create_all()
+   
 
 
     @app.route("/callback")
@@ -93,23 +88,10 @@ def create_app():
                     }
                 )
                 user_data = user_response.json()
-                # print(user_data)
+                print(user_data)
                 # Create user record
-                existing_user = User.query.filter_by(username=user_data.get('login')).first()
-                if existing_user:
-                    existing_user.access_token = access_token
-                    db.session.commit()
-                    user = existing_user
-                else:
-                    user = User(
-                        username=user_data.get('login'),
-                        access_token=access_token
-                    )
-                    db.session.add(user)
-                    db.session.commit()
                 
                 # Log the user in
-                logger.info(f"User {user.username} logged in successfully")
                 
                 return redirect("https://github.com/apps/prReviewer/installations/new")
             except Exception as e:
